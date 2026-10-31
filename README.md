@@ -21,16 +21,32 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 
 ## Requirements
 
-- OpenCart 4.1 (tested on 4.1.0.4)
+- OpenCart 4.1 (tested on 4.1.0.4) or OpenCart 3.0.2 and newer (tested on 3.0.5.1)
 - PHP with the GD and cURL extensions, which OpenCart already uses
 - An Alt Text Generator API key ([get one free](https://alttextgeneratorai.com/dashboard))
 
 ## Install
 
-1. Download `altai.ocmod.zip` from the [releases page](https://github.com/balt1794/opencart-extension-alt-text-generator/releases).
-2. In the OpenCart admin, open **Extensions > Installer**, upload the file and click the green **Install** button.
-3. Open **Extensions > Extensions**, choose **Modules** in the list, find **Alt Text Generator AI** and click the green **+** to install it, then the blue pencil to open it.
-4. Paste your API key, check that **Status** is on and click **Save**.
+Download the file for your OpenCart version from the [releases page](https://github.com/balt1794/opencart-extension-alt-text-generator/releases):
+
+| Your OpenCart | File |
+| --- | --- |
+| 4.x | `altai.ocmod.zip` |
+| 3.x | `altai_oc3.ocmod.zip` |
+
+**OpenCart 4**
+
+1. Open **Extensions > Installer**, upload `altai.ocmod.zip` and click the green **Install** button.
+2. Open **Extensions > Extensions**, choose **Modules** in the list, find **Alt Text Generator AI** and click the green **+** to install it, then the blue pencil to open it.
+3. Paste your API key, check that **Status** is on and click **Save**.
+
+**OpenCart 3**
+
+1. Open **Extensions > Installer** and upload `altai_oc3.ocmod.zip`. Click the green **Install** button next to it.
+2. Open **Extensions > Extensions**, choose **Modules** in the list, find **Alt Text Generator AI** and click the green **+** to install it, then the blue pencil to open it.
+3. Paste your API key, set **Status** to **Enabled** and click the blue save button.
+
+Both versions work the same way from here on.
 
 ![The extension settings](https://raw.githubusercontent.com/balt1794/opencart-extension-alt-text-generator/main/assets/settings.png)
 
@@ -57,12 +73,13 @@ The extension changes the finished HTML of your pages, not your theme files, so 
 ## Tests
 
 ```sh
-php tests/rewrite_test.php
+php tests/rewrite_test.php      # OpenCart 4
+php tests/rewrite_test_oc3.php  # OpenCart 3
 ```
 
 ## Uninstall
 
-Removing the extension switches the alt text off in your storefront and keeps what you wrote, so installing it again brings it back.
+Removing the extension switches the alt text off in your storefront and keeps the alt texts you wrote, so installing it again brings them back. OpenCart removes the extension's settings, including the API key, so add the key again after installing.
 
 ## Privacy
 
@@ -75,8 +92,8 @@ When you generate alt text, a resized copy of the image (JPEG, up to 1024 px) an
 | "Add your API key" notice | Paste the key in the settings and click **Save**. |
 | "Invalid API key" | Copy the key again from your [dashboard](https://alttextgeneratorai.com/dashboard). |
 | "No credits left on this API key" | Add credits at [alttextgeneratorai.com](https://alttextgeneratorai.com). |
-| The page is not in the Catalog menu | Make sure the module is installed and refresh the admin. |
-| Alt text does not show on the storefront | Check **Status** is on, and clear the theme cache under **Dashboard > Developer settings**. |
+| The page is not in the Catalog menu | Make sure the module is installed and refresh the admin. You can always open it from Extensions > Extensions > Modules. |
+| Alt text does not show on the storefront | Check **Status** is on, and clear the theme cache under **Dashboard > Developer settings** (OpenCart 3: the blue gear on the dashboard). |
 
 ## Support
 

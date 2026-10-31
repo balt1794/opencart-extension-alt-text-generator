@@ -1,0 +1,380 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-cog"></i> {{ text_settings }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="module_alt_text_generator_status" id="input-status" class="form-control">
+                <option value="1"{% if module_alt_text_generator_status %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0"{% if not module_alt_text_generator_status %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-api-key">{{ entry_api_key }}</label>
+            <div class="col-sm-10">
+              <input type="password" name="module_alt_text_generator_api_key" value="{{ module_alt_text_generator_api_key }}" placeholder="{{ entry_api_key }}" id="input-api-key" class="form-control" autocomplete="off"/>
+              <div class="help-block"><a href="https://alttextgeneratorai.com/dashboard" target="_blank" rel="noopener">https://alttextgeneratorai.com/dashboard</a></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-alt-language">{{ entry_language }}</label>
+            <div class="col-sm-10">
+              <select name="module_alt_text_generator_language" id="input-alt-language" class="form-control">
+                {% for code, label in alt_languages %}
+                  <option value="{{ code }}"{% if code == module_alt_text_generator_language %} selected="selected"{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <div class="help-block">{{ text_help_language }}</div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+          <span><i class="fa fa-picture-o"></i> {{ text_images }}</span>
+          <span class="text-muted" style="font-weight: normal;">{{ text_credits }}: <strong id="altai-credits" style="font-size: 18px; color: #333;">&mdash;</strong></span>
+        </h3>
+      </div>
+      <div class="panel-body">
+        <div id="altai-no-key" class="alert alert-warning" style="display: none;">{{ text_no_key }}</div>
+        <div id="altai-alert" class="alert alert-danger" style="display: none;"></div>
+
+        <div class="row" style="margin-bottom: 15px;">
+          <div class="col-md-5">
+            <label for="input-store-language" class="control-label">{{ entry_store_language }}</label>
+            <select id="input-store-language" class="form-control">
+              {% for language in store_languages %}
+                <option value="{{ language.language_id }}"{% if language.language_id == store_language_id %} selected="selected"{% endif %}>{{ language.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="help-block">{{ text_help_store_language }}</div>
+          </div>
+          <div class="col-md-7 text-right" style="padding-top: 25px;">
+            <button type="button" id="altai-stop" class="btn btn-danger" style="display: none;">{{ text_stop }}</button>
+            <button type="button" id="altai-generate" class="btn btn-primary">{{ text_generate_missing }}</button>
+            <button type="button" id="altai-save" class="btn btn-success" disabled="disabled">{{ text_save_changes }}</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 15px;">
+          <button type="button" id="altai-scan" class="btn btn-default btn-sm">{{ text_scan }}</button>
+          <button type="button" id="altai-filter-missing" class="btn btn-primary btn-sm">{{ text_missing }}</button>
+          <button type="button" id="altai-filter-all" class="btn btn-default btn-sm">{{ text_all }}</button>
+          <label style="font-weight: normal; margin: 0 0 0 10px;"><input type="checkbox" id="altai-overwrite"/> {{ text_overwrite }}</label>
+        </div>
+
+        <div id="altai-list" class="list-group"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+(function () {
+  var URLS = {
+    images: '{{ url_images|escape('js') }}',
+    generate: '{{ url_generate|escape('js') }}',
+    apply: '{{ url_apply|escape('js') }}',
+    credits: '{{ url_credits|escape('js') }}'
+  };
+  var T = {
+    generateMissing: '{{ text_generate_missing|escape('js') }}',
+    generateSelected: '{{ text_generate_selected|escape('js') }}',
+    generate: '{{ text_generate|escape('js') }}',
+    regenerate: '{{ text_regenerate|escape('js') }}',
+    save: '{{ text_save_changes|escape('js') }}',
+    missing: '{{ text_missing|escape('js') }}',
+    all: '{{ text_all|escape('js') }}',
+    writing: '{{ text_writing|escape('js') }}',
+    noAlt: '{{ text_no_alt|escape('js') }}',
+    noImages: '{{ text_no_images|escape('js') }}',
+    allHaveAlt: '{{ text_all_have_alt|escape('js') }}',
+    loading: '{{ text_loading|escape('js') }}'
+  };
+  var CONCURRENCY = 3;
+
+  var state = { images: [], filter: 'missing', drafts: {}, selected: {}, working: {}, failed: {}, running: false, stop: false };
+  var list = document.getElementById('altai-list');
+
+  function $(id) { return document.getElementById(id); }
+  function has(object, key) { return Object.prototype.hasOwnProperty.call(object, key); }
+  function hasKey() { return $('input-api-key').value.trim() !== ''; }
+  function show(el, on) { el.style.display = on ? '' : 'none'; }
+
+  function showError(message) {
+    $('altai-alert').textContent = message || '';
+    show($('altai-alert'), Boolean(message));
+  }
+
+  function valueOf(image) {
+    return has(state.drafts, image.image) ? state.drafts[image.image] : image.alt;
+  }
+
+  function changed() {
+    return Object.keys(state.drafts).filter(function (path) {
+      var image = state.images.filter(function (item) { return item.image === path; })[0];
+      return image && state.drafts[path].trim() !== image.alt.trim();
+    });
+  }
+
+  function visible() {
+    return state.filter === 'missing' ? state.images.filter(function (image) { return image.alt === ''; }) : state.images;
+  }
+
+  function targets() {
+    var picked = visible().filter(function (image) { return state.selected[image.image]; });
+    if (picked.length) return { list: picked, label: T.generateSelected + ' (' + picked.length + ')' };
+    var overwrite = $('altai-overwrite').checked;
+    var rest = visible().filter(function (image) { return overwrite || (image.alt === '' && !has(state.drafts, image.image)); });
+    return { list: rest, label: T.generateMissing + ' (' + rest.length + ')' };
+  }
+
+  function updateControls() {
+    var missing = state.images.filter(function (image) { return image.alt === ''; }).length;
+    $('altai-filter-missing').textContent = T.missing + ' (' + missing + ')';
+    $('altai-filter-all').textContent = T.all + ' (' + state.images.length + ')';
+    $('altai-filter-missing').className = 'btn btn-sm ' + (state.filter === 'missing' ? 'btn-primary' : 'btn-default');
+    $('altai-filter-all').className = 'btn btn-sm ' + (state.filter === 'all' ? 'btn-primary' : 'btn-default');
+    var t = targets();
+    $('altai-generate').textContent = t.label;
+    $('altai-generate').disabled = t.list.length === 0 || !hasKey() || state.running;
+    show($('altai-generate'), !state.running);
+    show($('altai-stop'), state.running);
+    var count = changed().length;
+    $('altai-save').textContent = T.save + ' (' + count + ')';
+    $('altai-save').disabled = count === 0 || state.running;
+    show($('altai-no-key'), !hasKey());
+  }
+
+  function render() {
+    list.innerHTML = '';
+    var rows = visible();
+    if (!rows.length) {
+      var empty = document.createElement('div');
+      empty.className = 'list-group-item text-muted';
+      empty.textContent = state.images.length === 0 ? T.noImages : (state.filter === 'missing' ? T.allHaveAlt : T.noImages);
+      list.appendChild(empty);
+      updateControls();
+      return;
+    }
+    rows.forEach(function (image) {
+      var row = document.createElement('div');
+      row.className = 'list-group-item';
+      row.style.display = 'flex';
+      row.style.alignItems = 'flex-start';
+      row.style.gap = '16px';
+
+      var checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.style.marginTop = '10px';
+      checkbox.checked = Boolean(state.selected[image.image]);
+      checkbox.addEventListener('change', function () {
+        if (checkbox.checked) state.selected[image.image] = true; else delete state.selected[image.image];
+        updateControls();
+      });
+
+      var thumb = document.createElement('img');
+      thumb.src = image.thumb;
+      thumb.alt = '';
+      thumb.width = 72;
+      thumb.height = 72;
+      thumb.style.objectFit = 'cover';
+      thumb.style.flexShrink = '0';
+      thumb.className = 'img-rounded';
+
+      var body = document.createElement('div');
+      body.style.flex = '1';
+      body.style.minWidth = '0';
+      var title = document.createElement('div');
+      title.style.fontWeight = 'bold';
+      title.textContent = image.name;
+      var path = document.createElement('div');
+      path.className = 'small text-muted';
+      path.style.overflow = 'hidden';
+      path.style.textOverflow = 'ellipsis';
+      path.style.whiteSpace = 'nowrap';
+      path.textContent = image.image;
+      var textarea = document.createElement('textarea');
+      textarea.className = 'form-control';
+      textarea.style.marginTop = '4px';
+      textarea.rows = 2;
+      textarea.value = valueOf(image);
+      textarea.placeholder = state.working[image.image] ? T.writing : T.noAlt;
+      textarea.disabled = Boolean(state.working[image.image]);
+      textarea.addEventListener('input', function () { state.drafts[image.image] = textarea.value; updateControls(); });
+      body.appendChild(title);
+      body.appendChild(path);
+      body.appendChild(textarea);
+      if (state.failed[image.image]) {
+        var failed = document.createElement('div');
+        failed.className = 'small text-danger';
+        failed.style.marginTop = '4px';
+        failed.textContent = state.failed[image.image];
+        body.appendChild(failed);
+      }
+
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-default btn-sm';
+      button.textContent = valueOf(image) ? T.regenerate : T.generate;
+      button.disabled = state.running || !hasKey();
+      button.addEventListener('click', function () { generate([image]); });
+
+      row.appendChild(checkbox);
+      row.appendChild(thumb);
+      row.appendChild(body);
+      row.appendChild(button);
+      list.appendChild(row);
+    });
+    updateControls();
+  }
+
+  function request(url, body) {
+    return fetch(url, { method: body ? 'POST' : 'GET', body: body || undefined, credentials: 'same-origin' }).then(function (response) { return response.json(); });
+  }
+
+  function load() {
+    list.innerHTML = '';
+    var loading = document.createElement('div');
+    loading.className = 'list-group-item text-muted';
+    loading.textContent = T.loading;
+    list.appendChild(loading);
+    showError('');
+    return request(URLS.images + '&language_id=' + encodeURIComponent($('input-store-language').value)).then(function (data) {
+      if (data.error) throw new Error(data.error);
+      state.images = data.images;
+      state.drafts = {};
+      state.selected = {};
+      state.failed = {};
+    }).catch(function (error) {
+      showError(error.message);
+      state.images = [];
+    }).then(render);
+  }
+
+  function loadCredits() {
+    request(URLS.credits).then(function (data) {
+      $('altai-credits').textContent = data.credits === null || data.credits === undefined ? '—' : data.credits;
+    }).catch(function () {
+      $('altai-credits').textContent = '—';
+    });
+  }
+
+  function generateOne(image) {
+    state.working[image.image] = true;
+    delete state.failed[image.image];
+    render();
+    var body = new URLSearchParams();
+    body.append('image', image.image);
+    body.append('language', $('input-alt-language').value);
+    return request(URLS.generate, body).then(function (data) {
+      if (data.error) {
+        state.failed[image.image] = data.error;
+        return Boolean(data.fatal);
+      }
+      state.drafts[image.image] = data.alt;
+      if (data.credits !== null && data.credits !== undefined) $('altai-credits').textContent = data.credits;
+      return false;
+    }).catch(function (error) {
+      state.failed[image.image] = error.message;
+      return false;
+    }).then(function (fatal) {
+      delete state.working[image.image];
+      render();
+      return fatal;
+    });
+  }
+
+  function generate(batch) {
+    if (!batch.length) return;
+    state.stop = false;
+    state.running = true;
+    render();
+    var queue = batch.slice();
+    var fatal = false;
+    function worker() {
+      if (!queue.length || state.stop || fatal) return Promise.resolve();
+      return generateOne(queue.shift()).then(function (isFatal) {
+        if (isFatal) fatal = true;
+        return worker();
+      });
+    }
+    var workers = [];
+    for (var i = 0; i < Math.min(CONCURRENCY, batch.length); i++) workers.push(worker());
+    Promise.all(workers).then(function () {
+      state.running = false;
+      render();
+      loadCredits();
+    });
+  }
+
+  function saveAll() {
+    var paths = changed();
+    var body = new URLSearchParams();
+    body.append('language_id', $('input-store-language').value);
+    paths.forEach(function (path, index) {
+      body.append('items[' + index + '][image]', path);
+      body.append('items[' + index + '][alt]', state.drafts[path]);
+    });
+    $('altai-save').disabled = true;
+    request(URLS.apply, body).then(function (data) {
+      if (data.error) throw new Error(data.error);
+      return load().then(function () { showSuccess(data.success); });
+    }).catch(function (error) {
+      showError(error.message);
+      updateControls();
+    });
+  }
+
+  function showSuccess(message) {
+    var alert = document.createElement('div');
+    alert.className = 'alert alert-success';
+    alert.textContent = message;
+    $('altai-no-key').parentNode.insertBefore(alert, $('altai-no-key'));
+    setTimeout(function () { alert.parentNode && alert.parentNode.removeChild(alert); }, 6000);
+  }
+
+  $('altai-scan').addEventListener('click', load);
+  $('altai-filter-missing').addEventListener('click', function () { state.filter = 'missing'; render(); });
+  $('altai-filter-all').addEventListener('click', function () { state.filter = 'all'; render(); });
+  $('altai-overwrite').addEventListener('change', updateControls);
+  $('altai-generate').addEventListener('click', function () { generate(targets().list); });
+  $('altai-stop').addEventListener('click', function () { state.stop = true; });
+  $('altai-save').addEventListener('click', saveAll);
+  $('input-store-language').addEventListener('change', load);
+  $('input-api-key').addEventListener('input', updateControls);
+
+  load();
+  loadCredits();
+})();
+//--></script>
+{{ footer }}

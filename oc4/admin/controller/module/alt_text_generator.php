@@ -319,7 +319,7 @@ class AltTextGenerator extends \Opencart\System\Engine\Controller {
 			// Starts switched on, because there is no alt text to show until some has been written.
 			$this->load->model('setting/setting');
 
-			$this->model_setting_setting->editSetting('module_alt_text_generator', [
+			$this->model_setting_setting->editSetting('module_alt_text_generator', $this->model_setting_setting->getSetting('module_alt_text_generator') + [
 				'module_alt_text_generator_status'   => 1,
 				'module_alt_text_generator_language' => 'english'
 			]);
