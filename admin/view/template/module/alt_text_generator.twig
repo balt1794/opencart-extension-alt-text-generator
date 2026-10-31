@@ -1,0 +1,356 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-module" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa-solid fa-save"></i></button>
+        <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-gear"></i> {{ text_settings }}</div>
+      <div class="card-body">
+        <form id="form-module" action="{{ save }}" method="post" data-oc-toggle="ajax">
+          <div class="row mb-3">
+            <label for="input-status" class="col-sm-2 col-form-label">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <div class="form-check form-switch form-switch-lg">
+                <input type="hidden" name="module_alt_text_generator_status" value="0"/>
+                <input type="checkbox" name="module_alt_text_generator_status" value="1" id="input-status" class="form-check-input"{% if module_alt_text_generator_status %} checked{% endif %}/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="input-api-key" class="col-sm-2 col-form-label">{{ entry_api_key }}</label>
+            <div class="col-sm-10">
+              <input type="password" name="module_alt_text_generator_api_key" value="{{ module_alt_text_generator_api_key }}" placeholder="{{ entry_api_key }}" id="input-api-key" class="form-control" autocomplete="off"/>
+              <div class="form-text"><a href="https://alttextgeneratorai.com/dashboard" target="_blank" rel="noopener">https://alttextgeneratorai.com/dashboard</a></div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="input-alt-language" class="col-sm-2 col-form-label">{{ entry_language }}</label>
+            <div class="col-sm-10">
+              <select name="module_alt_text_generator_language" id="input-alt-language" class="form-select">
+                {% for code, label in alt_languages %}
+                  <option value="{{ code }}"{% if code == module_alt_text_generator_language %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">{{ text_help_language }}</div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span><i class="fa-regular fa-image"></i> {{ text_images }}</span>
+        <span class="text-muted">{{ text_credits }}: <strong id="altai-credits" class="fs-5 text-body">&mdash;</strong></span>
+      </div>
+      <div class="card-body">
+        <div id="altai-no-key" class="alert alert-warning" style="display: none;">{{ text_no_key }}</div>
+        <div id="altai-alert" class="alert alert-danger" style="display: none;"></div>
+
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-md-5">
+            <label for="input-store-language" class="form-label">{{ entry_store_language }}</label>
+            <select id="input-store-language" class="form-select">
+              {% for language in store_languages %}
+                <option value="{{ language.language_id }}"{% if language.language_id == store_language_id %} selected{% endif %}>{{ language.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">{{ text_help_store_language }}</div>
+          </div>
+          <div class="col-md-7 text-md-end">
+            <button type="button" id="altai-stop" class="btn btn-danger" style="display: none;">{{ text_stop }}</button>
+            <button type="button" id="altai-generate" class="btn btn-primary">{{ text_generate_missing }}</button>
+            <button type="button" id="altai-save" class="btn btn-success" disabled>{{ text_save_changes }}</button>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <button type="button" id="altai-scan" class="btn btn-light btn-sm">{{ text_scan }}</button>
+          <button type="button" id="altai-filter-missing" class="btn btn-primary btn-sm">{{ text_missing }}</button>
+          <button type="button" id="altai-filter-all" class="btn btn-light btn-sm">{{ text_all }}</button>
+          <div class="form-check ms-2">
+            <input type="checkbox" id="altai-overwrite" class="form-check-input"/>
+            <label for="altai-overwrite" class="form-check-label">{{ text_overwrite }}</label>
+          </div>
+        </div>
+
+        <div id="altai-list" class="list-group"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+(function () {
+  const URLS = {
+    images: '{{ url_images|escape('js') }}',
+    generate: '{{ url_generate|escape('js') }}',
+    apply: '{{ url_apply|escape('js') }}',
+    credits: '{{ url_credits|escape('js') }}'
+  };
+  const T = {
+    generateMissing: '{{ text_generate_missing|escape('js') }}',
+    generateSelected: '{{ text_generate_selected|escape('js') }}',
+    generate: '{{ text_generate|escape('js') }}',
+    regenerate: '{{ text_regenerate|escape('js') }}',
+    save: '{{ text_save_changes|escape('js') }}',
+    missing: '{{ text_missing|escape('js') }}',
+    all: '{{ text_all|escape('js') }}',
+    writing: '{{ text_writing|escape('js') }}',
+    noAlt: '{{ text_no_alt|escape('js') }}',
+    noImages: '{{ text_no_images|escape('js') }}',
+    allHaveAlt: '{{ text_all_have_alt|escape('js') }}',
+    loading: '{{ text_loading|escape('js') }}'
+  };
+  const CONCURRENCY = 3;
+
+  const state = { images: [], filter: 'missing', drafts: {}, selected: new Set(), working: new Set(), failed: {}, running: false, stop: false };
+  const $ = (id) => document.getElementById(id);
+  const list = $('altai-list');
+
+  const hasKey = () => $('input-api-key').value.trim() !== '';
+  const show = (el, on) => { el.style.display = on ? '' : 'none'; };
+
+  function showError(message) {
+    $('altai-alert').textContent = message || '';
+    show($('altai-alert'), Boolean(message));
+  }
+
+  function valueOf(image) {
+    return Object.prototype.hasOwnProperty.call(state.drafts, image.image) ? state.drafts[image.image] : image.alt;
+  }
+
+  function changed() {
+    return Object.keys(state.drafts).filter((path) => {
+      const image = state.images.find((item) => item.image === path);
+      return image && state.drafts[path].trim() !== image.alt.trim();
+    });
+  }
+
+  function visible() {
+    return state.filter === 'missing' ? state.images.filter((image) => image.alt === '') : state.images;
+  }
+
+  function targets() {
+    const picked = visible().filter((image) => state.selected.has(image.image));
+    if (picked.length) return { list: picked, label: T.generateSelected + ' (' + picked.length + ')' };
+    const overwrite = $('altai-overwrite').checked;
+    const rest = visible().filter((image) => overwrite || (image.alt === '' && !Object.prototype.hasOwnProperty.call(state.drafts, image.image)));
+    return { list: rest, label: T.generateMissing + ' (' + rest.length + ')' };
+  }
+
+  function updateControls() {
+    const missing = state.images.filter((image) => image.alt === '').length;
+    $('altai-filter-missing').textContent = T.missing + ' (' + missing + ')';
+    $('altai-filter-all').textContent = T.all + ' (' + state.images.length + ')';
+    $('altai-filter-missing').className = 'btn btn-sm ' + (state.filter === 'missing' ? 'btn-primary' : 'btn-light');
+    $('altai-filter-all').className = 'btn btn-sm ' + (state.filter === 'all' ? 'btn-primary' : 'btn-light');
+    const t = targets();
+    $('altai-generate').textContent = t.label;
+    $('altai-generate').disabled = t.list.length === 0 || !hasKey() || state.running;
+    show($('altai-generate'), !state.running);
+    show($('altai-stop'), state.running);
+    const count = changed().length;
+    $('altai-save').textContent = T.save + ' (' + count + ')';
+    $('altai-save').disabled = count === 0 || state.running;
+    show($('altai-no-key'), !hasKey());
+  }
+
+  function render() {
+    list.innerHTML = '';
+    const rows = visible();
+    if (!rows.length) {
+      const empty = document.createElement('div');
+      empty.className = 'list-group-item text-muted';
+      empty.textContent = state.images.length === 0 ? T.noImages : (state.filter === 'missing' ? T.allHaveAlt : T.noImages);
+      list.appendChild(empty);
+      updateControls();
+      return;
+    }
+    rows.forEach((image) => {
+      const row = document.createElement('div');
+      row.className = 'list-group-item d-flex align-items-start gap-3';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'form-check-input mt-2';
+      checkbox.checked = state.selected.has(image.image);
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) state.selected.add(image.image); else state.selected.delete(image.image);
+        updateControls();
+      });
+      const thumb = document.createElement('img');
+      thumb.src = image.thumb;
+      thumb.alt = '';
+      thumb.width = 72;
+      thumb.height = 72;
+      thumb.style.objectFit = 'cover';
+      thumb.className = 'rounded flex-shrink-0';
+      const body = document.createElement('div');
+      body.className = 'flex-grow-1';
+      body.style.minWidth = '0';
+      const title = document.createElement('div');
+      title.className = 'fw-bold';
+      title.textContent = image.name;
+      const path = document.createElement('div');
+      path.className = 'small text-muted text-truncate';
+      path.textContent = image.image;
+      const textarea = document.createElement('textarea');
+      textarea.className = 'form-control mt-1';
+      textarea.rows = 2;
+      textarea.value = valueOf(image);
+      textarea.placeholder = state.working.has(image.image) ? T.writing : T.noAlt;
+      textarea.disabled = state.working.has(image.image);
+      textarea.addEventListener('input', () => { state.drafts[image.image] = textarea.value; updateControls(); });
+      body.append(title, path, textarea);
+      if (state.failed[image.image]) {
+        const failed = document.createElement('div');
+        failed.className = 'small text-danger mt-1';
+        failed.textContent = state.failed[image.image];
+        body.appendChild(failed);
+      }
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-light btn-sm';
+      button.textContent = valueOf(image) ? T.regenerate : T.generate;
+      button.disabled = state.running || !hasKey();
+      button.addEventListener('click', () => generate([image]));
+      row.append(checkbox, thumb, body, button);
+      list.appendChild(row);
+    });
+    updateControls();
+  }
+
+  async function load() {
+    list.innerHTML = '';
+    const loading = document.createElement('div');
+    loading.className = 'list-group-item text-muted';
+    loading.textContent = T.loading;
+    list.appendChild(loading);
+    showError('');
+    try {
+      const response = await fetch(URLS.images + '&language_id=' + encodeURIComponent($('input-store-language').value));
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      state.images = data.images;
+      state.drafts = {};
+      state.selected = new Set();
+      state.failed = {};
+    } catch (error) {
+      showError(error.message);
+      state.images = [];
+    }
+    render();
+  }
+
+  async function loadCredits() {
+    try {
+      const response = await fetch(URLS.credits);
+      const data = await response.json();
+      $('altai-credits').textContent = data.credits === null || data.credits === undefined ? '—' : data.credits;
+    } catch (error) {
+      $('altai-credits').textContent = '—';
+    }
+  }
+
+  async function generateOne(image) {
+    state.working.add(image.image);
+    delete state.failed[image.image];
+    render();
+    try {
+      const body = new URLSearchParams({ image: image.image, language: $('input-alt-language').value });
+      const response = await fetch(URLS.generate, { method: 'POST', body });
+      const data = await response.json();
+      if (data.error) {
+        state.failed[image.image] = data.error;
+        return Boolean(data.fatal);
+      }
+      state.drafts[image.image] = data.alt;
+      if (data.credits !== null && data.credits !== undefined) $('altai-credits').textContent = data.credits;
+      return false;
+    } catch (error) {
+      state.failed[image.image] = error.message;
+      return false;
+    } finally {
+      state.working.delete(image.image);
+      render();
+    }
+  }
+
+  async function generate(batch) {
+    if (!batch.length) return;
+    state.stop = false;
+    state.running = true;
+    render();
+    const queue = batch.slice();
+    let fatal = false;
+    const worker = async () => {
+      while (queue.length && !state.stop && !fatal) {
+        if (await generateOne(queue.shift())) fatal = true;
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batch.length) }, worker));
+    state.running = false;
+    render();
+    loadCredits();
+  }
+
+  async function saveAll() {
+    const paths = changed();
+    const body = new URLSearchParams({ language_id: $('input-store-language').value });
+    paths.forEach((path, index) => {
+      body.append('items[' + index + '][image]', path);
+      body.append('items[' + index + '][alt]', state.drafts[path]);
+    });
+    $('altai-save').disabled = true;
+    try {
+      const response = await fetch(URLS.apply, { method: 'POST', body });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      await load();
+      showSuccess(data.success);
+    } catch (error) {
+      showError(error.message);
+      updateControls();
+    }
+  }
+
+  function showSuccess(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success alert-dismissible';
+    alert.textContent = message;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'btn-close';
+    close.setAttribute('data-bs-dismiss', 'alert');
+    alert.appendChild(close);
+    $('altai-no-key').parentNode.insertBefore(alert, $('altai-no-key'));
+    setTimeout(() => alert.remove(), 6000);
+  }
+
+  $('altai-scan').addEventListener('click', load);
+  $('altai-filter-missing').addEventListener('click', () => { state.filter = 'missing'; render(); });
+  $('altai-filter-all').addEventListener('click', () => { state.filter = 'all'; render(); });
+  $('altai-overwrite').addEventListener('change', updateControls);
+  $('altai-generate').addEventListener('click', () => generate(targets().list));
+  $('altai-stop').addEventListener('click', () => { state.stop = true; });
+  $('altai-save').addEventListener('click', saveAll);
+  $('input-store-language').addEventListener('change', load);
+  $('input-api-key').addEventListener('input', updateControls);
+
+  load();
+  loadCredits();
+})();
+//--></script>
+{{ footer }}
