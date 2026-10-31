@@ -33,7 +33,7 @@ The extension is free. Writing alt text uses credits from your Alt Text Generato
 Support: support@alttextgeneratorai.com
 ```
 
-**Category**: SEO if it is in the list, otherwise Modules or Miscellaneous.
+**Category**: Marketing. The list is AI & Chat, Marketplaces, Conversions, Themes, Languages, Payment Gateways, Shipping Methods, Modules, Order Totals, Other, Reports, Product Feeds, Social Media, VQMod and Marketing, and there is no SEO. Image SEO sits best under Marketing. AI & Chat is the second choice, and the category can be changed later.
 
 **License**: Free. Leave License Period, Price and Cloud Price empty.
 
