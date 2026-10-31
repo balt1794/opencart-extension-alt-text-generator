@@ -21,7 +21,7 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 
 ## Requirements
 
-- OpenCart 4.1 (tested on 4.1.0.4) or OpenCart 3.0.2 and newer (tested on 3.0.5.1)
+- OpenCart 4.0.2.0 to 4.1.0.4 (all nine versions in that range tested), or OpenCart 3.0.2 and newer (tested on 3.0.5.1 and 3.0.3.8)
 - PHP with the GD and cURL extensions, which OpenCart already uses
 - An Alt Text Generator API key ([get one free](https://alttextgeneratorai.com/dashboard))
 
