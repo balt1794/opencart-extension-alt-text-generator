@@ -8,11 +8,13 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 
 ![The Alt Text Generator AI page in the OpenCart admin](https://raw.githubusercontent.com/balt1794/opencart-extension-alt-text-generator/main/assets/bulk-results.png)
 
+![The alt text of a product image before and after](https://raw.githubusercontent.com/balt1794/opencart-extension-alt-text-generator/main/assets/before-after.png)
+
 ## What you get
 
 - **A bulk page.** An **Alt Text Generator AI** page under **Catalog** scans the images used by your products, categories, brands and banners, shows thumbnails, lists the ones without alt text, and generates it for all of them or only the ones you tick.
 - **Review before saving.** Edit any text, then save everything at once.
-- **Works with your theme.** OpenCart has no alt field for images and uses the product name as the alt text. The extension keeps its own list and puts the alt text into the images of your storefront, on product pages, listings and category pages, with no theme changes. Images without alt text keep OpenCart's default.
+- **Works with your theme.** OpenCart has no alt field for images and uses the product name as the alt text. The extension keeps its own list and puts the alt text into the images of your storefront, on product pages, listings and category pages, with no theme changes. It has been tested on OpenCart's default theme and on third-party themes. Images without alt text keep OpenCart's default.
 - **131 languages.** Choose the language the alt text is written in, and the store language it is saved for.
 - **Credits shown in the admin.** One credit writes alt text for one image. New accounts get free credits.
 - **Your key stays on your server.** The API key is only used by the extension's server code and never reaches the browser.
@@ -50,7 +52,7 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 
 ## Themes
 
-The extension changes the finished HTML of your pages, not your theme files, so it works with custom themes. It finds an image by its address, including resized copies in `image/cache` and lazy-loading themes that keep the address in `data-src`. If a theme loads images in a way that hides their address, or builds them in JavaScript, the alt text cannot be added there.
+The extension changes the finished HTML of your pages, not your theme files, so it works with custom themes. It has been tested on OpenCart's default theme and on third-party themes. It finds an image by its address, including resized copies in `image/cache` and lazy-loading themes that keep the address in `data-src`. If a theme loads images in a way that hides their address, or builds them in JavaScript, the alt text cannot be added there.
 
 ## Tests
 
