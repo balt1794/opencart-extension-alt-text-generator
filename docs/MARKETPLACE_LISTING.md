@@ -21,11 +21,11 @@ What you get
 - Bulk page under Catalog: see every image that has no alt text, generate for all of them or only the ones you tick
 - Review before saving: edit any text, then save everything at once
 - Works with your theme: no theme files or template edits, no OCMOD or vQmod. It adds the text to the finished page, including resized images and lazy-loaded images
-- 131 languages: choose the language of the alt text and the store language it is saved for
+- 131 languages, including English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Chinese, Japanese, Korean, Arabic and Hindi. Choose the language of the alt text and the store language it is saved for
 - Safe: images that have no alt text keep OpenCart's default, and removing the extension brings your shop back to the default
 - Your API key stays on your server and is never sent to the browser
 
-Works with OpenCart 3 (3.0.2.0 and newer) and OpenCart 4 (4.0.2.0 and newer, including 4.1). Download the file that matches your version.
+Works with OpenCart 3 (3.0.2.0 to 3.0.5.1) and OpenCart 4 (4.0.2.0 to 4.1.0.4). Download the file that matches your version.
 
 How it is priced
 The extension is free. Writing alt text uses credits from your Alt Text Generator AI account: one credit per image. New accounts get free credits to try it, and you can add more at alttextgeneratorai.com. A resized copy of the image is sent to alttextgeneratorai.com when you generate. Images are not stored.
