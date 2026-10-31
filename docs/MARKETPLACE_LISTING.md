@@ -25,7 +25,7 @@ What you get
 - Safe: images that have no alt text keep OpenCart's default, and removing the extension brings your shop back to the default
 - Your API key stays on your server and is never sent to the browser
 
-Works with OpenCart 3 (3.0.2 and newer) and OpenCart 4 (4.0.2.0 and newer, including 4.1). Download the file that matches your version.
+Works with OpenCart 3 (3.0.2.0 and newer) and OpenCart 4 (4.0.2.0 and newer, including 4.1). Download the file that matches your version.
 
 How it is priced
 The extension is free. Writing alt text uses credits from your Alt Text Generator AI account: one credit per image. New accounts get free credits to try it, and you can add more at alttextgeneratorai.com. A resized copy of the image is sent to alttextgeneratorai.com when you generate. Images are not stored.
@@ -87,7 +87,7 @@ Leave **Cloud** off for the first release.
 
 | Download name | File | Compatibility to tick |
 | --- | --- | --- |
-| Alt Text Generator AI for OpenCart 3 | `altai_oc3.ocmod.zip` | 3.0.5.1 and 3.0.3.8 (tested). More 3.0.x versions after they are tested. |
+| Alt Text Generator AI for OpenCart 3 | `altai_oc3.ocmod.zip` | 3.0.5.1, 3.0.5.0, 3.0.4.1, 3.0.4.0, 3.0.3.9, 3.0.3.8, 3.0.3.7, 3.0.3.6, 3.0.3.5, 3.0.3.3, 3.0.3.2, 3.0.3.1, 3.0.3.0, 3.0.2.0 (each one tested on its own shop). Not 3.x.x.x, 3.0.1.x or 3.0.0.0. |
 | Alt Text Generator AI for OpenCart 4 | `altai.ocmod.zip` | 4.1.0.4, 4.1.0.3, 4.1.0.2, 4.1.0.1, 4.1.0.0, 4.0.2.3, 4.0.2.2, 4.0.2.1, 4.0.2.0 (each one tested on its own shop). Not 4.0.1.x, 4.0.0.0 or 4.x.x.x. |
 
 ## Extension History
