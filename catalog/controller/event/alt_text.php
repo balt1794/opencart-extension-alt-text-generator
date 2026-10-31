@@ -4,10 +4,17 @@ namespace Opencart\Catalog\Controller\Extension\Altai\Event;
  * Class AltText
  *
  * Puts the alt text written with Alt Text Generator AI into the images of the storefront.
+ * It works on the finished HTML of every view, so it does not depend on the theme.
  *
  * @package Opencart\Catalog\Controller\Extension\Altai\Event
  */
 class AltText extends \Opencart\System\Engine\Controller {
+	/**
+	 * Attributes that can hold the address of the picture. Lazy-loading themes keep the real
+	 * address in a data attribute and put a placeholder in src.
+	 */
+	private const SOURCE_ATTRIBUTES = ['src', 'data-src', 'data-lazy-src', 'data-original', 'data-lazy'];
+
 	/**
 	 * @var array<int, array<string, string>>
 	 */
@@ -29,15 +36,52 @@ class AltText extends \Opencart\System\Engine\Controller {
 
 		$map = $this->map((int)$this->config->get('config_language_id'));
 
-		if (!$map) {
-			return;
+		if ($map) {
+			$output = self::rewriteHtml($output, $map);
+		}
+	}
+
+	/**
+	 * Rewrite the alt attribute of every image whose picture has alt text
+	 *
+	 * @param string                $html
+	 * @param array<string, string> $map alt text keyed by the image path without its extension, in lower case
+	 *
+	 * @return string
+	 */
+	public static function rewriteHtml(string $html, array $map): string {
+		$result = preg_replace_callback('/<img\b[^>]*>/i', static fn(array $match): string => self::rewriteTag($match[0], $map), $html);
+
+		return is_string($result) ? $result : $html;
+	}
+
+	/**
+	 * The key an image path has in the map: no extension, lower case
+	 *
+	 * @param string $path path relative to the image folder
+	 *
+	 * @return string
+	 */
+	public static function key(string $path): string {
+		return strtolower((string)preg_replace('/\.[A-Za-z0-9]+$/', '', $path));
+	}
+
+	/**
+	 * The path of the original picture behind an address used in a page, or an empty string
+	 *
+	 * @param string $url
+	 *
+	 * @return string
+	 */
+	public static function originalPath(string $url): string {
+		$path = rawurldecode((string)parse_url(html_entity_decode($url, ENT_QUOTES, 'UTF-8'), PHP_URL_PATH));
+
+		if (!preg_match('#(?:^|/)image/(.+)$#', $path, $found)) {
+			return '';
 		}
 
-		$result = preg_replace_callback('/<img\b[^>]*>/i', fn(array $match): string => $this->rewrite($match[0], $map), $output);
-
-		if (is_string($result)) {
-			$output = $result;
-		}
+		// A resized copy lives in image/cache and has its size added to the file name.
+		return (string)preg_replace('/-\d+x\d+(\.[A-Za-z0-9]+)$/', '$1', (string)preg_replace('#^cache/#', '', $found[1]));
 	}
 
 	/**
@@ -66,44 +110,39 @@ class AltText extends \Opencart\System\Engine\Controller {
 	}
 
 	/**
-	 * Rewrite the alt attribute of one image tag when alt text exists for its picture
-	 *
 	 * @param string                $tag
 	 * @param array<string, string> $map
 	 *
 	 * @return string
 	 */
-	private function rewrite(string $tag, array $map): string {
-		if (!preg_match('/\bsrc\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/i', $tag, $source)) {
+	private static function rewriteTag(string $tag, array $map): string {
+		$alt = null;
+
+		foreach (self::SOURCE_ATTRIBUTES as $attribute) {
+			if (!preg_match('/\s' . preg_quote($attribute, '/') . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/i', $tag, $source)) {
+				continue;
+			}
+
+			$path = self::originalPath($source[1] !== '' ? $source[1] : ($source[2] ?? ''));
+
+			if ($path !== '' && isset($map[self::key($path)])) {
+				$alt = $map[self::key($path)];
+
+				break;
+			}
+		}
+
+		if ($alt === null) {
 			return $tag;
 		}
 
-		$url = html_entity_decode($source[1] !== '' ? $source[1] : ($source[2] ?? ''), ENT_QUOTES, 'UTF-8');
-		$path = rawurldecode((string)parse_url($url, PHP_URL_PATH));
-
-		if (!preg_match('#/image/(.+)$#', $path, $found)) {
-			return $tag;
-		}
-
-		// A resized copy lives in image/cache and has its size added to the file name.
-		$relative = preg_replace('/-\d+x\d+(\.[A-Za-z0-9]+)$/', '$1', preg_replace('#^cache/#', '', $found[1]));
-		$key = self::key((string)$relative);
-
-		if (!isset($map[$key])) {
-			return $tag;
-		}
-
-		$alt = htmlspecialchars($map[$key], ENT_QUOTES, 'UTF-8');
-		$pattern = '/\balt\s*=\s*(?:"[^"]*"|\'[^\']*\')/i';
+		$escaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
+		$pattern = '/\salt\s*=\s*(?:"[^"]*"|\'[^\']*\')/i';
 
 		if (preg_match($pattern, $tag)) {
-			return (string)preg_replace_callback($pattern, static fn(): string => 'alt="' . $alt . '"', $tag, 1);
+			return (string)preg_replace_callback($pattern, static fn(): string => ' alt="' . $escaped . '"', $tag, 1);
 		}
 
-		return (string)preg_replace_callback('/^<img\b/i', static fn(): string => '<img alt="' . $alt . '"', $tag, 1);
-	}
-
-	private static function key(string $path): string {
-		return strtolower((string)preg_replace('/\.[A-Za-z0-9]+$/', '', $path));
+		return (string)preg_replace_callback('/^<img\b/i', static fn(): string => '<img alt="' . $escaped . '"', $tag, 1);
 	}
 }

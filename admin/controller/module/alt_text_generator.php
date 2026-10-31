@@ -221,7 +221,7 @@ class AltTextGenerator extends \Opencart\System\Engine\Controller {
 				$json['error'] = $this->language->get('error_no_credits');
 				$json['fatal'] = true;
 			} elseif ($result['status'] >= 400 || $result['body'] === '') {
-				$json['error'] = ($result['body'] !== '' && strlen($result['body']) < 160 && $result['body'][0] !== '<') ? $result['body'] : $this->language->get('error_generation');
+				$json['error'] = ($result['body'] !== '' && strlen($result['body']) < 160 && $result['body'][0] !== '<') ? $result['body'] : sprintf($this->language->get('error_generation_status'), $result['status']);
 			} else {
 				$json['alt'] = $result['body'];
 				$json['credits'] = $result['credits'];

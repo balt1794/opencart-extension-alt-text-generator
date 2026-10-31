@@ -10,7 +10,7 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 
 ## What you get
 
-- **A bulk page.** An **Alt Text Generator AI** page under **Catalog** scans the images used by your products, categories and brands, shows thumbnails, lists the ones without alt text, and generates it for all of them or only the ones you tick.
+- **A bulk page.** An **Alt Text Generator AI** page under **Catalog** scans the images used by your products, categories, brands and banners, shows thumbnails, lists the ones without alt text, and generates it for all of them or only the ones you tick.
 - **Review before saving.** Edit any text, then save everything at once.
 - **Works with your theme.** OpenCart has no alt field for images and uses the product name as the alt text. The extension keeps its own list and puts the alt text into the images of your storefront, on product pages, listings and category pages, with no theme changes. Images without alt text keep OpenCart's default.
 - **131 languages.** Choose the language the alt text is written in, and the store language it is saved for.
@@ -47,6 +47,16 @@ Write SEO-friendly alt text for the images in your OpenCart shop. Generate it fo
 ### Languages
 
 **Language of the alt text** is the language the text is written in. **Save for store language** is the shop language whose visitors see it. If your shop has several languages, generate and save once for each.
+
+## Themes
+
+The extension changes the finished HTML of your pages, not your theme files, so it works with custom themes. It finds an image by its address, including resized copies in `image/cache` and lazy-loading themes that keep the address in `data-src`. If a theme loads images in a way that hides their address, or builds them in JavaScript, the alt text cannot be added there.
+
+## Tests
+
+```sh
+php tests/rewrite_test.php
+```
 
 ## Uninstall
 

@@ -45,3 +45,4 @@ $_['error_unreachable']    = 'Could not reach Alt Text Generator AI. Check the s
 $_['error_invalid_key']    = 'Invalid API key.';
 $_['error_no_credits']     = 'No credits left on this API key.';
 $_['error_generation']     = 'Generation failed.';
+$_['error_generation_status'] = 'Generation failed (HTTP %d). Please try again, and contact support@alttextgeneratorai.com if it keeps happening.';

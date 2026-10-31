@@ -177,7 +177,7 @@ class AltTextGenerator extends \Opencart\System\Engine\Model {
 	}
 
 	/**
-	 * Get the images used by products, categories and manufacturers.
+	 * Get the images used by products, categories, brands and banners.
 	 *
 	 * @param int $language_id language the labels are shown in
 	 *
@@ -190,7 +190,8 @@ class AltTextGenerator extends \Opencart\System\Engine\Model {
 			['text' => "SELECT p.`image` AS `image`, pd.`name` AS `name`, 'product' AS `source` FROM `" . DB_PREFIX . "product` p LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.`product_id` = pd.`product_id` AND pd.`language_id` = '" . (int)$language_id . "') WHERE p.`image` <> ''"],
 			['text' => "SELECT pi.`image` AS `image`, pd.`name` AS `name`, 'product' AS `source` FROM `" . DB_PREFIX . "product_image` pi LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (pi.`product_id` = pd.`product_id` AND pd.`language_id` = '" . (int)$language_id . "') WHERE pi.`image` <> ''"],
 			['text' => "SELECT c.`image` AS `image`, cd.`name` AS `name`, 'category' AS `source` FROM `" . DB_PREFIX . "category` c LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (c.`category_id` = cd.`category_id` AND cd.`language_id` = '" . (int)$language_id . "') WHERE c.`image` <> ''"],
-			['text' => "SELECT m.`image` AS `image`, m.`name` AS `name`, 'manufacturer' AS `source` FROM `" . DB_PREFIX . "manufacturer` m WHERE m.`image` <> ''"]
+			['text' => "SELECT m.`image` AS `image`, m.`name` AS `name`, 'manufacturer' AS `source` FROM `" . DB_PREFIX . "manufacturer` m WHERE m.`image` <> ''"],
+			['text' => "SELECT bi.`image` AS `image`, bi.`title` AS `name`, 'banner' AS `source` FROM `" . DB_PREFIX . "banner_image` bi WHERE bi.`image` <> '' AND bi.`language_id` = '" . (int)$language_id . "'"]
 		];
 
 		foreach ($sources as $source) {
