@@ -5,6 +5,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 rm -f altai.ocmod.zip altai_oc3.ocmod.zip alt_text_generator_ai.ocmod.zip
-(cd oc4 && zip -qr ../altai.ocmod.zip install.json admin catalog)
-(cd oc3 && zip -qr ../altai_oc3.ocmod.zip upload)
+(cd oc4 && cp ../INSTALL.txt . && zip -qr ../altai.ocmod.zip install.json INSTALL.txt admin catalog && rm INSTALL.txt)
+(cd oc3 && cp ../INSTALL.txt . && zip -qr ../altai_oc3.ocmod.zip INSTALL.txt upload && rm INSTALL.txt)
 echo "Built altai.ocmod.zip (OpenCart 4.x) and altai_oc3.ocmod.zip (OpenCart 3.x)"

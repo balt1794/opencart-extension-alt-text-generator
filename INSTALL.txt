@@ -1,0 +1,25 @@
+Alt Text Generator AI for OpenCart
+==================================
+
+Writes SEO-friendly alt text for the images in your shop, in bulk and in 131 languages,
+and puts it into your storefront with no theme changes. You need an API key from
+https://alttextgeneratorai.com/dashboard (free credits for new accounts).
+
+Install
+-------
+1. Open Extensions > Installer, upload this file and click the green Install button.
+2. Open Extensions > Extensions, choose "Modules" in the list, find "Alt Text Generator AI"
+   and click the green + to install it, then the blue pencil to open it.
+3. Paste your API key, make sure Status is on, and save.
+4. Open Catalog > Alt Text Generator AI. Click "Generate all missing", read the results,
+   edit anything you like and click "Save changes".
+
+OpenCart 4 uses the file named altai.ocmod.zip. OpenCart 3 uses altai_oc3.ocmod.zip.
+
+Uninstall
+---------
+Extensions > Extensions > Modules > Alt Text Generator AI > red button. The alt texts you wrote
+are kept, so installing the extension again brings them back. OpenCart removes the settings,
+including the API key, so paste the key again after installing.
+
+Support: support@alttextgeneratorai.com
